@@ -1,3 +1,4 @@
+import shlex
 import subprocess
 import logging
 from pathlib import Path
@@ -19,19 +20,18 @@ class MapDamageAnalyzer:
         filtered_bam = self.config.temp_dir / f"{sample_acc}_filtered.bam"
         sorted_filtered_bam = self.config.temp_dir / f"{sample_acc}_filtered.sorted.bam"
         
-        # Filter and sort
+        # Filter and sort using an awk pipeline
         try:
-            subprocess.run([
-                "samtools", "view", "-b", "-q", "30", "-e", "pos>=300",
-                "-o", str(filtered_bam), str(softclipped_bam)
-            ], check=True)
-            subprocess.run([
-                "samtools", "sort", "-o", str(sorted_filtered_bam), str(filtered_bam)
-            ], check=True)
-            subprocess.run([
-            "samtools", "index", str(sorted_filtered_bam)
-            ], check=True)
-            filtered_bam.unlink(missing_ok=True)
+            threshold = 300
+            filter_cmd = (
+                f"samtools view -h -q 30 {shlex.quote(str(softclipped_bam))} | "
+                f"awk 'BEGIN{{OFS=\"\\t\"}} /^@/ || $4>={threshold}' | "
+                f"samtools view -b - | "
+                f"samtools sort -o {shlex.quote(str(sorted_filtered_bam))}"
+            )
+            subprocess.run(filter_cmd, shell=True, executable='/bin/bash', check=True)
+            # インデックス作成（BAI）
+            subprocess.run(["samtools", "index", str(sorted_filtered_bam)], check=True)
         except subprocess.CalledProcessError as e:
             logger.error(f"Filtering failed for {sample_acc}: {e}")
             return None
