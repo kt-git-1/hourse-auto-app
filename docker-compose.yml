@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  auto-app2:
+    build: .
+    container_name: auto-app2-container
+    volumes:
+      - ./data:/app/data
+      - ./config.py:/app/config.py
+      - ./main.py:/app/main.py
+      - ./modules:/app/modules
+    environment:
+      - PYTHONPATH=/app
+    working_dir: /app
+    stdin_open: true
+    tty: true
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+          cpus: '4'
+        reservations:
+          memory: 4G
+          cpus: '2'
