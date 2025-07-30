@@ -22,11 +22,14 @@ class MapDamageAnalyzer:
         # Filter and sort
         try:
             subprocess.run([
-                "samtools", "view", "-b", "-q", "30", "-e", "POS>=300",
+                "samtools", "view", "-b", "-q", "30", "-e", "pos>=300",
                 "-o", str(filtered_bam), str(softclipped_bam)
             ], check=True)
             subprocess.run([
                 "samtools", "sort", "-o", str(sorted_filtered_bam), str(filtered_bam)
+            ], check=True)
+            subprocess.run([
+            "samtools", "index", str(sorted_filtered_bam)
             ], check=True)
             filtered_bam.unlink(missing_ok=True)
         except subprocess.CalledProcessError as e:
