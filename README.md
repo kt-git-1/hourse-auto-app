@@ -200,6 +200,14 @@ A. configのプロジェクトIDやサンプルIDが正しいか、ネットワ�
 ### Q. BAM/VCF等の出力がない
 A. ログファイル（`data/logs/`）を確認し、エラー内容を特定してください。
 
+### Q. Qualimap 実行時に `Unrecognized VM option 'MaxPermSize=1024m'` と表示される
+A. Java 9 以降では `-XX:MaxPermSize` オプションが廃止されており、Qualimap が起動に失敗することがあります。
+   `modules/analyzers.py` では Java 17 でも動作するよう `JAVA_TOOL_OPTIONS=-XX:+IgnoreUnrecognizedVMOptions` を自動で指定しますが、
+   手動で Qualimap を実行する場合は以下のように環境変数を付与してください:
+   ```sh
+   JAVA_TOOL_OPTIONS="-XX:+IgnoreUnrecognizedVMOptions" qualimap bamqc ...
+   ```
+
 **備考:**  
 - 詳細な使い方やパラメータ説明は、`config.py`や各モジュールのdocstringを参照してください。
 - 実際の解析例や出力例も追記可能です。
