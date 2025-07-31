@@ -79,12 +79,21 @@ def main():
         
         # Step 5: mapDamage
         mapdamage_result = mapdamage_analyzer.run_mapdamage(sample_acc, softclipped_bam)
+        if not mapdamage_result:
+            logger.error(f"MapDamage analyzing failed for {sample_acc}")
+            continue
         
         # Step 6: Qualimap
         qualimap_result = qualimap_analyzer.run_qualimap(sample_acc, dedup_bam)
+        if not qualimap_result:
+            logger.error(f"Qualimap analyzing failed for {sample_acc}")
+            continue
         
         # Step 7: HaplotypeCaller
         vcf_file = haplotypecaller.run_haplotypecaller(sample_acc, dedup_bam)
+        if not vcf_file:
+            logger.error(f"HaplotypeCaller failed for {sample_acc}")
+            continue
         
         logger.info(f"Completed processing for {sample_acc}")
     
