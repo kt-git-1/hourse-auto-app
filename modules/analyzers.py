@@ -1,3 +1,4 @@
+import os
 import shlex
 import subprocess
 import logging
@@ -106,8 +107,13 @@ class QualimapAnalyzer:
             "-outformat", "HTML",
             "--java-mem-size=8G",
         ]
+        env = os.environ.copy()
+        # Java 9+ no longer recognizes -XX:MaxPermSize, which Qualimap still adds
+        # in its launch script. The following option tells the JVM to ignore
+        # any unsupported -XX arguments so Qualimap can run under Java 17.
+        env["JAVA_TOOL_OPTIONS"] = env.get("JAVA_TOOL_OPTIONS", "") + " -XX:+IgnoreUnrecognizedVMOptions"
         try:
-            subprocess.run(qualimap_cmd, check=True)
+            subprocess.run(qualimap_cmd, check=True, env=env)
             logger.info(f"Qualimap completed for {sample_acc}")
             return sample_outdir
         except subprocess.CalledProcessError as e:
