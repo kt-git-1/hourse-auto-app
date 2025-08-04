@@ -17,7 +17,8 @@ class PipelineConfig:
         self.temp_dir = self.base_dir / "temp"
         
         # 参照ゲノム
-        self.reference_genome = args.reference_genome or (self.base_dir / "reference" / "equCab3.nochrUn.fa")
+        # self.reference_genome = args.reference_genome or (self.base_dir / "reference" / "equCab3.nochrUn.fa")
+        self.reference_genome = args.reference_genome or (self.base_dir / "reference" / "equCab3.fa")
 
         # 作成
         for dir_path in [self.raw_data_dir, self.results_dir, self.logs_dir, self.temp_dir]:
