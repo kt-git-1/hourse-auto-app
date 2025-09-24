@@ -1,8 +1,6 @@
-# auto-app2
-
 ## 概要
 
-**auto-app2** は NGS（次世代シーケンス）データ解析を自動化する Python 製パイプラインです。
+**hourse-auto-app** は NGS（次世代シーケンス）データ解析を自動化する Python 製パイプラインです。
 ENA からのデータ取得、BWA によるマッピング、Soft clipping、Picard や samtools による BAM 処理、mapDamage/Qualimap による QC、GATK HaplotypeCaller を用いた variant calling までを一括で実行します。古 DNA やゲノム解析の再現性の高いワークフロー構築を支援します。
 
 - **対応 OS:** macOS, Linux
@@ -39,7 +37,7 @@ ENA からのデータ取得、BWA によるマッピング、Soft clipping、Pi
 ## ディレクトリ構成
 
 ```
-auto-app2/
+hourse-auto-app/
 ├── config.py                # 設定と引数解析
 ├── environment.yml          # Conda 環境定義
 ├── main.py                  # パイプライン実行スクリプト
