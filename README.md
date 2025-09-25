@@ -4,7 +4,7 @@
 ENA からのデータ取得、BWA によるマッピング、Soft clipping、Picard や samtools による BAM 処理、mapDamage/Qualimap による QC、GATK HaplotypeCaller を用いた variant calling までを一括で実行します。古 DNA やゲノム解析の再現性の高いワークフロー構築を支援します。
 
 - **対応 OS:** macOS, Linux
-- **主な機能:** ENA からの FASTQ 取得、BWA マッピング、Soft clipping、BAM sort/duplicate removal、mapDamage・Qualimap・HaplotypeCaller 解析、VCF 出力
+- **主な機能:** ENA からの FASTQ 取得、BWA マッピング、Soft clipping、BAM sort/duplicate removal、mapDamage・Qualimap・HaplotypeCaller 解析、VCF 出力、解析完了後の中間 BAM 自動削除
 
 ---
 
@@ -31,6 +31,7 @@ ENA からのデータ取得、BWA によるマッピング、Soft clipping、Pi
 - **自動化**: データ取得から解析まで一括実行
 - **再現性**: コマンドライン引数でパラメータを管理
 - **拡張性**: モジュール構造で機能追加が容易
+- **省ストレージ**: mapDamage・Qualimap・HaplotypeCaller の完了を検知して BAM/BAI などの大容量中間ファイルを自動削除
 
 ---
 
@@ -146,9 +147,9 @@ python main.py \
 2. **BWA + AdapterRemoval でマッピング** (`modules/bwa_mapper.py`)
 3. **Soft clipping の適用** (`modules/softclipper.py`)
 4. **BAM sort / dedup / index** (`modules/bam_processor.py`)
-5. **mapDamage によるダメージ解析** (`modules/analyzers.py`)
+5. **mapDamage によるダメージ解析** (`modules/analyzers.py`) ※ 完了後に `bam_files/` 以下の BWA 中間 BAM/BAI/`.truncated` をクリーンアップ
 6. **Qualimap による品質評価** (`modules/analyzers.py`)
-7. **HaplotypeCaller による Variant Calling** (`modules/analyzers.py`)
+7. **HaplotypeCaller による Variant Calling** (`modules/analyzers.py`) ※ Qualimap と HaplotypeCaller の成功後に重複除去済み BAM と索引を削除
 
 各ステップは `main.py` から自動的に呼び出され、結果は `data/results/<ProjectID>/<SampleID>/` 以下に保存されます。
 
