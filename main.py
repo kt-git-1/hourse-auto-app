@@ -11,6 +11,18 @@ from modules.softclipper import SoftClipper
 from modules.bam_processor import BAMProcessor
 from modules.analyzers import MapDamageAnalyzer, QualimapAnalyzer, HaplotypeCaller
 
+
+def _cleanup_intermediate_file(path: Path, logger):
+    """Remove intermediate files safely while logging the result."""
+    if not path:
+        return
+    try:
+        if path.exists():
+            path.unlink()
+            logger.info(f"Removed intermediate file: {path}")
+    except Exception as exc:  # pragma: no cover - cleanup failures shouldn't stop the pipeline
+        logger.warning(f"Failed to remove intermediate file {path}: {exc}")
+
 def main():
     # 設定とログの初期化
     args = parse_args()
@@ -70,19 +82,26 @@ def main():
         if not softclipped_bam:
             logger.error(f"Softclipping failed for {sample_acc}")
             continue
-        
+        _cleanup_intermediate_file(bam_file, logger)
+
         # Step 4: BAM processing (sort, dedup, index)
         dedup_bam = bam_processor.run_bam_processing(sample_acc, softclipped_bam)
         if not dedup_bam:
             logger.error(f"BAM processing failed for {sample_acc}")
             continue
-        
+
         # Step 5: mapDamage
         mapdamage_result = mapdamage_analyzer.run_mapdamage(sample_acc, softclipped_bam)
         if not mapdamage_result:
             logger.error(f"MapDamage analyzing failed for {sample_acc}")
             continue
-        
+
+        bam_dir = dedup_bam.parent.parent / "bam_files"
+        if bam_dir.exists():
+            for pattern in ("*.bam", "*.bai", "*.truncated"):
+                for intermediate in bam_dir.glob(pattern):
+                    _cleanup_intermediate_file(intermediate, logger)
+
         # Step 6: Qualimap
         qualimap_result = qualimap_analyzer.run_qualimap(sample_acc, dedup_bam)
         if not qualimap_result:
@@ -94,7 +113,12 @@ def main():
         if not vcf_file:
             logger.error(f"HaplotypeCaller failed for {sample_acc}")
             continue
-        
+
+        # Cleanup large intermediate files once downstream analyses are finished
+        dedup_bam_index = Path(str(dedup_bam) + ".bai")
+        _cleanup_intermediate_file(dedup_bam_index, logger)
+        _cleanup_intermediate_file(dedup_bam, logger)
+
         logger.info(f"Completed processing for {sample_acc}")
     
     logger.info("Pipeline completed successfully!")
