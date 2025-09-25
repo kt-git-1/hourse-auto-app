@@ -26,7 +26,10 @@ class PipelineConfig:
 
 def parse_args():
     script_dir = Path(__file__).parent.resolve()
-    parser = argparse.ArgumentParser(description="Complete ENA download and analysis pipeline")
+    parser = argparse.ArgumentParser(
+        description="Complete ENA download and analysis pipeline",
+        fromfile_prefix_chars='@',
+    )
     parser.add_argument("--project_accession", default="PRJEB19970", help="ENA project accession")
     parser.add_argument("--base_dir", type=Path, default=script_dir / "data", help="Base directory for all data")
     parser.add_argument("--reference_genome", type=Path, help="Reference genome FASTA file")
