@@ -118,6 +118,7 @@ def main():
         dedup_bam_index = Path(str(dedup_bam) + ".bai")
         _cleanup_intermediate_file(dedup_bam_index, logger)
         _cleanup_intermediate_file(dedup_bam, logger)
+        _cleanup_intermediate_file(softclipped_bam, logger)
 
         logger.info(f"Completed processing for {sample_acc}")
     
